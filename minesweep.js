@@ -8,6 +8,9 @@ const allFields = [];
 var noInfiniteLoopPls = false;
 var devMode = false;
 var firstTurn = true;
+// var numRevealedCells = 0;
+var revealedCells = []
+var numMines;
 
 
 
@@ -90,22 +93,52 @@ function markMine(event){
     
 }
 
-function armMines() {    // i need number of all mines and then decide how many will be armed depending on level hardness.
+function armMines(firstClicked) {    // i need number of all mines and then decide how many will be armed depending on level hardness.
     if(devMode==true){
         var mode = 'easy'
     } else {
         var mode = document.getElementById('mode').value
     }
-    console.log(mode)
+    console.log('mode: ' + mode);
     var takenSpots=[];
+    firstClicked = toNum(firstClicked);
+    var beginnerArea = [
+        firstClicked,                       // main
+        firstClicked - gridsize,            // upper
+        firstClicked - gridsize + 1,        // upRight
+        firstClicked + 1,                   // right
+        firstClicked + gridsize + 1,        // lowRight
+        firstClicked + gridsize,            // lower
+        firstClicked + gridsize - 1,        // lowLeft
+        firstClicked - 1,                   // left
+        firstClicked - gridsize - 1,        // upLeft
+
+        firstClicked - 2 * gridsize,            // 2upper
+        firstClicked - 2 * gridsize + 1,        // 2upper 1left
+        firstClicked - 2 * gridsize + 2,        // 2upper 2right
+        firstClicked - gridsize + 2,            // 1upper 2right
+        firstClicked + 2,                       // 2right
+        firstClicked + gridsize + 2,            // 1lower 2right
+        firstClicked + 2 * gridsize + 2,        // 2lower 2right
+        firstClicked + 2 * gridsize + 1,        // 2lower 1right
+        firstClicked + 2 * gridsize,            // 2lower
+        firstClicked + 2 * gridsize - 1,        // 2lower 1left
+        firstClicked + 2 * gridsize - 2,        // 2lower 2left
+        firstClicked + gridsize - 2,            // 1lower 2left
+        firstClicked - 2,                       // 2left
+        firstClicked - gridsize - 2,            // 1upper 2left
+        firstClicked - 2 * gridsize - 2,        // 2upper 2left
+        firstClicked - 2 * gridsize - 1         // 2upper 1left
+    ];
+    
     if(mode=='easy'){
-        var numMines = Math.floor((gridsize*gridsize)*0.1); //10%
+        numMines = Math.floor((gridsize*gridsize)*0.1); //10%
     } else if(mode=='middle') {
-        var numMines = Math.floor((gridsize*gridsize)*0.15); //15%
+        numMines = Math.floor((gridsize*gridsize)*0.15); //15%
     } else if(mode=='hard') {
-        var numMines = Math.floor((gridsize*gridsize)*0.20); // 20%
+        numMines = Math.floor((gridsize*gridsize)*0.20); // 20%
     } else if(mode=='veryHard') {
-        var numMines = Math.floor((gridsize*gridsize)*0.25); // 25%
+        numMines = Math.floor((gridsize*gridsize)*0.25); // 25%
     } else{
         console.log('no mode selected'); 
         if(!devMode){
@@ -115,20 +148,28 @@ function armMines() {    // i need number of all mines and then decide how many 
     }
     for (i=0; numMines>i; i++) {
         var selectedSpot=Math.floor(Math.random()*((gridsize*gridsize)));
-        if(takenSpots.includes(selectedSpot) != 'true') {
+        if(takenSpots.includes(selectedSpot) != true && beginnerArea.includes(selectedSpot) == false ) {    //could happen that it blocks cells not adjacent to other because the array is not made with boundaries in mind
             document.getElementById('div'+selectedSpot).setAttribute('class', 'armedMine');
             takenSpots[i]=selectedSpot;
         } else {
-            console.log('neuer versuch');
+            console.log('generating mine in other cell');
             i--;
+        }
+    }
+    if(devMode==true){
+        for(i=0; i<beginnerArea.length; i++){
+            if(document.getElementById(toDiv(beginnerArea[i])) != null ){
+                document.getElementById(toDiv(beginnerArea[i])).style.backgroundColor = 'brown';
+            }
         }
     }
 }
 
 function handleLeftClick(mineID) {            // if theres a flag present delete flag, else reveal 
-    if(firstTurn){
+    if(firstTurn == true){
         armMines(mineID);       //mines erst armen wenn erster turn gemacht wird damit garantiert wird, das erster turn großes Feld offenlegt (unimplementiert stand 08.12.)
-    }
+        console.log('first Turn');
+    } else {console.log('not first turn')}
     devMode = document.getElementById('devMode').checked
     if(document.getElementById(mineID).innerHTML=='🚩') {
         document.getElementById(mineID).innerHTML='‎';
@@ -149,6 +190,10 @@ function handleLeftClick(mineID) {            // if theres a flag present delete
 }
 
 function revealField(mineID) {
+    if (revealedCells.includes(mineID) == true) { // if cell already revealed exit
+        return;  
+    }
+    revealedCells[revealedCells.length] = mineID;         //keep track of all revealed cells (hopefully)
     let anlieger = fieldIndicator(mineID.split('div')[1]);
     let neighbouringCells = 0;
     for(i=0; i<anlieger.length; i++){
@@ -156,25 +201,27 @@ function revealField(mineID) {
             neighbouringCells = neighbouringCells+1;
         }
     }
+    // numRevealedCells++;
     if(neighbouringCells == 0){
         document.getElementById(mineID).innerHTML='';
         if(!noInfiniteLoopPls){
             noInfiniteLoopPls = true;
             fieldZero(mineID.split('div')[1]);          // i think not working actually ☝️🥸
         }
-    } 
+    }
     if(neighbouringCells>0){
         document.getElementById(mineID).innerHTML=neighbouringCells;
     } else {
         document.getElementById(mineID).innerHTML=''; 
     }
     document.getElementById(mineID).style.backgroundColor='#8b8f8c'
-    
+    console.log(revealedCells.length)
+    bigW();
     return neighbouringCells;
 }
 
 function fieldZero(mineID) {
-    let main = toDiv(mineID);
+    let main = toDiv(mineID);           //old variables not deleted yet (dont ask why am scared)
     let upper = toDiv(mineID - gridsize);
     let lower = toDiv(Number(mineID) + Number(gridsize));
     let left = toDiv(mineID - 1);
@@ -199,7 +246,7 @@ function fieldZero(mineID) {
 
     noInfiniteLoopPls = true; //no infin hihi
 
-    // PROBLEM: cells on the other side of the gamefield are getting called on SOLUTION (i think): same machanism as in fieldIndicator
+    // PROBLEM: cells on the other side of the gamefield are getting called on SOLUTION (i think): same machanism as in fieldIndicator RESOLVED but other way (ig)
 
     cellsToProcess.forEach(cell => {
         let targetID = Number(mineID) + cell.offset;
@@ -222,6 +269,7 @@ function fieldZero(mineID) {
             // If zero cell, recursively reveal
             if (neighbourCount === 0) {
                 fieldZero(targetID);
+                // revealedCells++;
             }
         }
     });
@@ -229,55 +277,38 @@ function fieldZero(mineID) {
     noInfiniteLoopPls = false;
 }
 
-function fieldIndicator(c) { // check if adjacent fields are armedMines, the number of armed mines in adjacent fields equals number oof innerHTML
-    var upper = allFields[c-gridsize];
-    var lower = allFields[Number(c)+Number(gridsize)];
-    var left = allFields[Number(c)-1];
-    var right = allFields[Number(c)+Number(1)];
+function fieldIndicator(c) {    // check if adjacent fields are armedMines, the number of armed mines in adjacent fields equals number oof innerHTML
+    const neighborOffsets = [
+        -gridsize - 1,  // up-left
+        -gridsize,      // up
+        -gridsize + 1,  // up-right
+        -1,             // left
+        1,              // right
+        gridsize - 1,   // down-left
+        gridsize,       // down
+        gridsize + 1    // down-right
+    ];
 
-    var upRight = allFields[c-Number(gridsize)+1];
-    var upLeft = allFields[c-(Number(gridsize)+1)];
-    var lowRight = allFields[Number(c)+Number(gridsize)+1];
-    var lowLeft = allFields[Number(c)+(Number(gridsize)-1)];
+    const currentRow = Math.floor(c / gridsize);
+    const currentCol = c % gridsize;
 
-    anlieger = [upper, upRight, right, lowRight, lower, lowLeft, left, upLeft];
+    return neighborOffsets.filter(offset => {
+        const neighborIndex = Number(c) + offset;
+        const neighborRow = Math.floor(neighborIndex / gridsize);
+        const neighborCol = neighborIndex % gridsize;
 
-    for(i=0; i<anlieger.length; i++){
-        if(isNaN(anlieger[i])){
-            anlieger[i] = 'NaN'
-            // console.log('is NaN but changed')
-        }
-    }
+        // Check if the neighbor is within grid boundaries
+        const withinRowBounds = 
+            neighborIndex >= 0 && 
+            neighborIndex < gridsize * gridsize;
 
-    //check if fields are really adjacent, if not then that cell will be set 0
-    if(allFields[upper]>0){
-        upper = allFields[upper];
-    } else {upper=0}
-    if(allFields[right]%gridsize != 0 && isNaN(allFields[right]) == false){
-        right = allFields[right];
-    } else {right=0}
-    if(allFields[lower]<gridsize*gridsize){
-        lower = allFields[lower];
-    } else {lower=0}
-    if(allFields[c]%gridsize != 0){
-        left = allFields[left];
-    } else {left=0}
-    if (allFields[upLeft] > 0 && allFields[upLeft] % gridsize != 0) {
-        upLeft = allFields[upLeft];
-    } else {upLeft = 0;}
-    if (allFields[upRight] > 0 && allFields[upRight] % gridsize != 0) {
-        upRight = allFields[upRight];
-    } else {upRight = 0;}
-    if (allFields[lowLeft] < gridsize * gridsize && allFields[lowLeft] % gridsize != 0) {
-        lowLeft = allFields[lowLeft];
-    } else {lowLeft = 0;}
-    if (allFields[lowRight] < gridsize * gridsize && allFields[lowRight] % gridsize != 0) {
-        lowRight = allFields[lowRight];
-    } else {lowRight = 0;}
+        const withinColBounds = 
+            Math.abs(neighborCol - currentCol) <= 1;
 
-    anlieger = [upper, upRight, right, lowRight, lower, lowLeft, left, upLeft];
-    return anlieger;
+        return withinRowBounds && withinColBounds;
+    }).map(offset => Number(c) + offset);
 }
+
 
 function resetField() {
     var minefield = document.getElementById('minefield');
@@ -288,6 +319,8 @@ function resetField() {
     minefield.innerHTML = '';
     j=0;
     console.log('field reset');
+    firstTurn = true;
+    revealedCells = [];
 }
 
 function toDiv(id){
@@ -298,11 +331,33 @@ function toNum(id){
     return(Number(id.replace('div', '')));
 }
 
-function revealAll() {
+function revealAllId() {
     for (let i = 0; i < gridsize * gridsize; i++) {
       setTimeout(() => {
         document.getElementById('div' + i).innerHTML = i;
       }, i * 10); // Delay increases for each iteration
+    }
+}
+
+function bigW(overwriter) {
+    if (revealedCells.length == (gridsize * gridsize) - numMines  || overwriter == 1) {
+        console.log('You just won, congrats!');
+        if (!devMode || overwriter == 1) {
+            alert('You just won, congrats!');
+            console.log('starting new game...');
+            
+            let time = 5;
+            const countdownTimer = setInterval(function() {
+                console.log(time);
+                time--;
+                if (time < 0) {
+                    clearInterval(countdownTimer);
+                    resetField();
+                }
+            }, 1000);
+        }
+    } else { 
+        return false; 
     }
 }
 
@@ -326,6 +381,10 @@ function revealOnlyMines(){ //just for dev
             document.getElementById('div' + i).innerHTML = '🧨';
         }
     }
+}
+
+function testButton(){
+    console.log(revealedCells)
 }
 /*
 TODO
