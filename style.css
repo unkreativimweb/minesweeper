@@ -6,8 +6,8 @@ body{
 div{
     width: 25px;
     height: 25px;
-    border: 2px solid white;    /*sonst nur linien? warum tho*/
-    background-color: rgb(157, 177, 173);
+    border: 1px solid white;    /*sonst nur linien? warum tho*/
+    background-color: #67e332;
     display: inline-block;
     text-overflow: hidden;
     overflow-y:hidden;          /*kein overflow in y-Richtung*/
@@ -49,17 +49,13 @@ button, input {
     top: 2%;
     right: 2%;
 }
-.mine {
-    border-radius: 10px;
+.mine, .armedMine {
+    border-radius: 2px;
 }
 #mode {
     position: absolute;
     top: 40%;
     left: 2%;
-}
-.armedMine {
-    border-radius: inherit;
-    /* background-color: red; */
 }
 
 /* Hide default HTML checkbox */

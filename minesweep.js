@@ -4,10 +4,10 @@ let numMarked=0;
 let gridsize;
 const minefield = document.getElementById('minefield')
 var counter=0
-// var anlieger=[];
 const allFields = [];
-var noInfinitLoopPls = false;
+var noInfiniteLoopPls = false;
 var devMode = false;
+var firstTurn = true;
 
 
 
@@ -57,7 +57,7 @@ function generate() {
         }
     }
     length();
-    armMines();
+    // armMines();  will now be donee after first handleLeftClick.
 }
 
 function length(){
@@ -97,9 +97,7 @@ function armMines() {    // i need number of all mines and then decide how many 
         var mode = document.getElementById('mode').value
     }
     console.log(mode)
-    // var gridsize=document.getElementById('gridsize').value;
     var takenSpots=[];
-    // console.log('number of fields: ' + j + '; mode: ' + mode);
     if(mode=='easy'){
         var numMines = Math.floor((gridsize*gridsize)*0.1); //10%
     } else if(mode=='middle') {
@@ -110,26 +108,28 @@ function armMines() {    // i need number of all mines and then decide how many 
         var numMines = Math.floor((gridsize*gridsize)*0.25); // 25%
     } else{
         console.log('no mode selected'); 
-        // alert('no mode selected'); //activate when not in dev
-        resetField();
+        if(!devMode){
+            alert('no mode selected');
+        }         
+        resetField();       //not sure ob das fr gebracuht wird
     }
     for (i=0; numMines>i; i++) {
         var selectedSpot=Math.floor(Math.random()*((gridsize*gridsize)));
         if(takenSpots.includes(selectedSpot) != 'true') {
             document.getElementById('div'+selectedSpot).setAttribute('class', 'armedMine');
             takenSpots[i]=selectedSpot;
-            // console.log(takenSpots[i]);
         } else {
             console.log('neuer versuch');
             i--;
         }
     }
-    // console.log('Fields: ' + (gridsize*gridsize) + ', davon Minen: ' + numMines + ', in Prozent also: ' + numMines/(gridsize*gridsize));
 }
 
 function handleLeftClick(mineID) {            // if theres a flag present delete flag, else reveal 
+    if(firstTurn){
+        armMines(mineID);       //mines erst armen wenn erster turn gemacht wird damit garantiert wird, das erster turn großes Feld offenlegt (unimplementiert stand 08.12.)
+    }
     devMode = document.getElementById('devMode').checked
-    // console.log('in handleLeftClick: ' + String(mineID))
     if(document.getElementById(mineID).innerHTML=='🚩') {
         document.getElementById(mineID).innerHTML='‎';
         numMarked--;    //update counter
@@ -142,95 +142,94 @@ function handleLeftClick(mineID) {            // if theres a flag present delete
             }
             console.log('Lost you piece of shit');
         } else {
-            // console.log('revealing now...');
             revealField(mineID); 
         }
     }
+    firstTurn = false;
 }
 
 function revealField(mineID) {
     let anlieger = fieldIndicator(mineID.split('div')[1]);
-    // console.log(anlieger)
     let neighbouringCells = 0;
-    // console.log(anlieger);
     for(i=0; i<anlieger.length; i++){
-        console.log(anlieger[i]+': '+document.getElementById('div' + anlieger[i]).classList.contains('armedMine'))
-        // console.log(document.getElementById('div' + anlieger[i]));
         if(document.getElementById('div' + anlieger[i]).classList.contains('armedMine') == true){
-            // console.log('neighbouringCells++')
             neighbouringCells = neighbouringCells+1;
-            // console.log('neighbouringCells: ' + neighbouringCells)
         }
     }
     if(neighbouringCells == 0){
-        // console.log('auch nc = 0')
         document.getElementById(mineID).innerHTML='';
-        if(!noInfinitLoopPls){
-            noInfinitLoopPls = true;
-            // document.getElementById(mineID).innerHTML='';
+        if(!noInfiniteLoopPls){
+            noInfiniteLoopPls = true;
             fieldZero(mineID.split('div')[1]);          // i think not working actually ☝️🥸
         }
     } 
-    // console.log(document.getElementById(mineID));
-    console.log('neighbouringCells('+mineID+'):'+neighbouringCells);
-    document.getElementById(mineID).innerHTML=neighbouringCells;
-    // console.log(neighbouringCells);
-    // return neighbouringCells;
+    if(neighbouringCells>0){
+        document.getElementById(mineID).innerHTML=neighbouringCells;
+    } else {
+        document.getElementById(mineID).innerHTML=''; 
+    }
+    document.getElementById(mineID).style.backgroundColor='#8b8f8c'
+    
+    return neighbouringCells;
 }
 
 function fieldZero(mineID) {
     let main = toDiv(mineID);
     let upper = toDiv(mineID - gridsize);
-    // let upRight = toDiv(mineID - Number(gridsize) + 1); doppelt hä
     let lower = toDiv(Number(mineID) + Number(gridsize));
-    let lowRight = toDiv(Number(mineID) + Number(gridsize) + 1);
     let left = toDiv(mineID - 1);
-    let lowLeft = toDiv(Number(mineID) + (Number(gridsize) - 1));
     let right = toDiv(Number(mineID) + 1);
     let upRight = toDiv(Number(mineID) - (Number(gridsize) + 1));
-    // let upLeft = toDiv(Number(mineID) - gridsize); nochmal doppelt wtf
     let upLeft = toDiv(Number(mineID) - (Number(gridsize) - 1));
+    let lowRight = toDiv(Number(mineID) + Number(gridsize) + 1);
+    let lowLeft = toDiv(Number(mineID) + (Number(gridsize) - 1));
     
-    // console.log(fieldIndicator(main))
-    handleLeftClick(main);
-    // console.log('main went through');
-    handleLeftClick(upper);
-    // console.log('upper went through');
-    handleLeftClick(upRight);
-    // console.log('upRight went through');
-    handleLeftClick(right);
-    // console.log('right went through');
-    handleLeftClick(lowRight);
-    // console.log('lowRight went through');
-    handleLeftClick(lower);
-    // console.log('lower went through');
-    handleLeftClick(lowLeft);
-    // console.log('lowLeft went through');
-    handleLeftClick(left);
-    // console.log('left went through');
-    handleLeftClick(upLeft);
-    // console.log('upLeft went through');
-    
-    if(revealField(upper)==0){
-        console.log('sent upper (' + upper + ') to handleLeftClick cause 0')     
-        handleLeftClick(upper);        // could be the string 'div#' comes thru... that would be wrong tho (i think)
-    }
-    if(revealField(lower)==0){
-        console.log('sent upper (' + lower + ') to handleLeftClick cause 0')     
-        handleLeftClick(lower);        // could be the string 'div#' comes thru... that would be wrong tho (i think)
-    }
-    if(revealField(left)==0){
-        console.log('sent upper (' + left + ') to handleLeftClick cause 0')     
-        handleLeftClick(left);        // could be the string 'div#' comes thru... that would be wrong tho (i think)
-    }
-    if(revealField(right)==0){
-        console.log('sent upper (' + right + ') to handleLeftClick cause 0')     
-        handleLeftClick(right);        // could be the string 'div#' comes thru... that would be wrong tho (i think)
-    }
-    noInfinitLoopPls = false
+    // Create an array of adjacent cells to process
+    let cellsToProcess = [
+        { offset: 0, name: 'main' },
+        { offset: -gridsize, name: 'upper', rowCheck: 'above' },
+        { offset: -gridsize+1, name: 'upRight', rowCheck: 'above', colCheck: 'rightEdge' },
+        { offset: 1, name: 'right', colCheck: 'rightEdge' },
+        { offset: gridsize+1, name: 'lowRight', rowCheck: 'below', colCheck: 'rightEdge' },
+        { offset: gridsize, name: 'lower', rowCheck: 'below' },
+        { offset: gridsize-1, name: 'lowLeft', rowCheck: 'below', colCheck: 'leftEdge' },
+        { offset: -1, name: 'left', colCheck: 'leftEdge' },
+        { offset: -gridsize-1, name: 'upLeft', rowCheck: 'above', colCheck: 'leftEdge' }
+    ];
+
+    noInfiniteLoopPls = true; //no infin hihi
+
+    // PROBLEM: cells on the other side of the gamefield are getting called on SOLUTION (i think): same machanism as in fieldIndicator
+
+    cellsToProcess.forEach(cell => {
+        let targetID = Number(mineID) + cell.offset;
+        let targetDiv = 'div' + targetID;
+
+        // Row boundary checks
+        if (cell.rowCheck === 'above' && targetID < 0) return;
+        if (cell.rowCheck === 'below' && targetID >= gridsize * gridsize) return;
+
+        // Column boundary checks
+        if (cell.colCheck === 'rightEdge' && (targetID % gridsize) === 0) return;
+        if (cell.colCheck === 'leftEdge' && ((targetID + 1) % gridsize) === 0) return;
+
+        let targetElement = document.getElementById(targetDiv);
+        
+        // Only process if element exists and not already revealed
+        if (targetElement && targetElement.innerHTML === '‎') {
+            let neighbourCount = revealField(targetDiv);
+            
+            // If zero cell, recursively reveal
+            if (neighbourCount === 0) {
+                fieldZero(targetID);
+            }
+        }
+    });
+
+    noInfiniteLoopPls = false;
 }
 
-function fieldIndicator(c) { // check if adjacent fields are armedMines, the number of armed mines in adjacent fields equals number on innerHTML
+function fieldIndicator(c) { // check if adjacent fields are armedMines, the number of armed mines in adjacent fields equals number oof innerHTML
     var upper = allFields[c-gridsize];
     var lower = allFields[Number(c)+Number(gridsize)];
     var left = allFields[Number(c)-1];
@@ -243,12 +242,10 @@ function fieldIndicator(c) { // check if adjacent fields are armedMines, the num
 
     anlieger = [upper, upRight, right, lowRight, lower, lowLeft, left, upLeft];
 
-    // console.log('indicating...' + c);
-
     for(i=0; i<anlieger.length; i++){
         if(isNaN(anlieger[i])){
             anlieger[i] = 'NaN'
-            console.log('is NaN but changed')
+            // console.log('is NaN but changed')
         }
     }
 
@@ -278,7 +275,7 @@ function fieldIndicator(c) { // check if adjacent fields are armedMines, the num
         lowRight = allFields[lowRight];
     } else {lowRight = 0;}
 
-    // anlieger = [upper, upRight, right, lowRight, lower, lowLeft, left, upLeft];
+    anlieger = [upper, upRight, right, lowRight, lower, lowLeft, left, upLeft];
     return anlieger;
 }
 
@@ -290,15 +287,15 @@ function resetField() {
     minefield.style.border=0;
     minefield.innerHTML = '';
     j=0;
-    // console.log('field reset')
+    console.log('field reset');
 }
 
 function toDiv(id){
-    return('div'+id)
+    return('div'+id);
 }
 
 function toNum(id){
-    return(Number(id.replace('div', '')))
+    return(Number(id.replace('div', '')));
 }
 
 function revealAll() {
