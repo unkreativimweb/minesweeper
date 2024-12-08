@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="style.css">
+        <!-- minesweeper -->
+    </head>
+    <body>
+        <div id="head">
+            <input type="number" id="gridsize" > <!-- onchange="generate(), resizeWindow()" -->
+            <button onclick="handleMainButton(), resizeWindow()">absenden!</button>
+            <p id="numMarked"></p>
+            <button onclick="handleMainButton()">testbutton</button>
+            <label>
+                <select id="mode">
+                    <option disabled selected value> -- select an option -- </option>
+                    <option value="easy">easy</option>
+                    <option value="middle">middle</option>
+                    <option value="hard">hard</option>
+                    <option value="veryHard">veryHard</option>
+                </select>
+            </label>
+            <label class="switch">
+                <input type="checkbox" id="devMode" value="true">
+                <span class="slider round"></span>
+            </label>
+        </div>
+        <div id="minefield"></div>
+        <!-- DOM has to load before i can call script -->
+        <script src="minesweep.js"></script>
+    </body>

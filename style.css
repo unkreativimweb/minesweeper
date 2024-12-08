@@ -1,0 +1,127 @@
+body{
+    overflow-x: hidden; /* Hide scrollbars */
+    margin: 0 auto; /* reset body */
+    font-size: smaller;
+}
+div{
+    width: 25px;
+    height: 25px;
+    border: 2px solid white;    /*sonst nur linien? warum tho*/
+    background-color: rgb(157, 177, 173);
+    display: inline-block;
+    text-overflow: hidden;
+    overflow-y:hidden;          /*kein overflow in y-Richtung*/
+    box-sizing: border-box;
+    vertical-align: top;
+}
+#head {
+    padding: 0;
+    border: 0;
+    margin: 0 auto;
+    width: 100vw;
+    min-height: 12vh;
+    height: auto+2vh;
+    background-color: blueviolet;
+    vertical-align: middle;
+    position: relative;
+}
+button, input {
+    margin: 0 auto;
+    display:block;
+    height: 3vh;
+    margin-top: 1%;
+}
+#minefield {
+    height: auto;
+    width: auto;
+    background-color: #FFFFFF;
+    text-align: center;
+    border: 2px solid black;
+    padding: 0;
+    cursor: default;            /*nur normaler cursor*/
+    user-select: none;          /*vermeiden von markierung der symbole auf den mienen*/
+    border-radius: 10px;
+}
+#numMarked {
+    font-size: xx-large;
+    color: red;
+    position: absolute;
+    top: 2%;
+    right: 2%;
+}
+.mine {
+    border-radius: 10px;
+}
+#mode {
+    position: absolute;
+    top: 40%;
+    left: 2%;
+}
+.armedMine {
+    border-radius: inherit;
+    /* background-color: red; */
+}
+
+/* Hide default HTML checkbox */
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  
+  /* The slider */
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    -webkit-transition: .4s;
+    transition: .4s;
+  }
+  
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 15px;
+    width: 15px;
+    left: 2px;
+    bottom: 2.25px;
+    background-color: white;
+    -webkit-transition: .4s;
+    transition: .4s;
+  }
+  
+  input:checked + .slider {
+    background-color: #2196F3;
+  }
+  
+  input:focus + .slider {
+    box-shadow: 0 0 1px #2196F3;
+  }
+  
+  input:checked + .slider:before {
+    -webkit-transform: translateX(20px);
+    -ms-transform: translateX(20px);
+    transform: translateX(20px);
+  }
+  
+  /* Rounded sliders */
+  .slider.round {
+    border-radius: 17px;
+  }
+  
+  .slider.round:before {
+    border-radius: 50%;
+  }
+.switch {
+    position: absolute;
+    top: 35%;
+    right: 5%;
+    display: inline-block;
+    width: 40px;
+    height: 20px;
+  }
+  
