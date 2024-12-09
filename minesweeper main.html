@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<html lang="de">
     <head>
         <meta charset="UTF-8">
         <link rel="stylesheet" href="style.css">
@@ -7,9 +8,6 @@
     <body>
         <div id="head">
             <input type="number" id="gridsize" > <!-- onchange="generate(), resizeWindow()" -->
-            <button onclick="handleMainButton(), resizeWindow()">absenden!</button>
-            <p id="numMarked"></p>
-            <button onclick="testButton()">testbutton</button>
             <label>
                 <select id="mode">
                     <option disabled selected value> -- select an option -- </option>
@@ -19,6 +17,9 @@
                     <option value="veryHard">veryHard</option>
                 </select>
             </label>
+            <button onclick="handleMainButton(), resizeWindow()">absenden!</button>
+            <p id="numMarked"></p>
+            <!-- <button onclick="testButton()">testbutton</button> -->
             <label class="switch">
                 <input type="checkbox" id="devMode" value="true">
                 <span class="slider round"></span>
@@ -28,3 +29,4 @@
         <!-- DOM has to load before i can call script -->
         <script src="minesweep.js"></script>
     </body>
+</html>

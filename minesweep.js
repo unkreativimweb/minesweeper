@@ -21,6 +21,7 @@ function resizeWindow(){
     if(document.getElementById('minefield').style.width !== ''){
         document.getElementById('minefield').style.marginLeft = (((window.innerWidth) - document.getElementById('minefield').offsetWidth)/2) + 'px';
     }
+    document.getElementById('minefield').style.marginTop = ((window.innerHeight - document.getElementById('minefield').offsetHeight)/2)-75 + 'px'
 }
 
 function generate() {
@@ -84,7 +85,7 @@ function markMine(event){
     if(marked.innerHTML=='🚩'){
         marked.innerHTML='‎'; //fill cell witth div number
         numMarked--;
-        document.getElementById('numMarked').innerHTML='🚩: '+numMarked;
+        document.getElementById('numMarked').innerHTML='🚩: '+numMarked+ '/' + numMines;
     }else{
         marked.innerHTML='🚩';
         numMarked++
@@ -101,7 +102,8 @@ function armMines(firstClicked) {    // i need number of all mines and then deci
     }
     console.log('mode: ' + mode);
     var takenSpots=[];
-    firstClicked = toNum(firstClicked);
+    firstClicked = parseInt(toNum(firstClicked));
+    gridsize = parseInt(gridsize);
     var beginnerArea = [
         firstClicked,                       // main
         firstClicked - gridsize,            // upper
@@ -163,6 +165,7 @@ function armMines(firstClicked) {    // i need number of all mines and then deci
             }
         }
     }
+    // console.log(beginnerArea);
 }
 
 function handleLeftClick(mineID) {            // if theres a flag present delete flag, else reveal 
@@ -177,9 +180,18 @@ function handleLeftClick(mineID) {            // if theres a flag present delete
         document.getElementById('numMarked').innerHTML='🚩: '+numMarked;
     } else {
         if(document.getElementById(mineID).classList.contains('armedMine')){    //losing mechanic
-            if(devMode == false){
+            if(!devMode){
                 alert('you just lost')
-                revealOnlyMines();    
+                revealOnlyMines();
+                let time = 5;
+                const countdownTimer = setInterval(function() {
+                    console.log(time);
+                    time--;
+                    if (time < 0) {
+                    clearInterval(countdownTimer);
+                    resetField();
+                    }
+                }, 1000);    
             }
             console.log('Lost you piece of shit');
         } else {
@@ -215,7 +227,7 @@ function revealField(mineID) {
         document.getElementById(mineID).innerHTML=''; 
     }
     document.getElementById(mineID).style.backgroundColor='#8b8f8c'
-    console.log(revealedCells.length)
+    // console.log(revealedCells.length);
     bigW();
     return neighbouringCells;
 }
@@ -321,6 +333,7 @@ function resetField() {
     console.log('field reset');
     firstTurn = true;
     revealedCells = [];
+    numMarked = 0;
 }
 
 function toDiv(id){
@@ -384,21 +397,26 @@ function revealOnlyMines(){ //just for dev
 }
 
 function testButton(){
-    console.log(revealedCells)
+    for(i=0; i<beginnerArea.length; i++){
+        if(document.getElementById(toDiv(beginnerArea[i])) != null ){
+            document.getElementById(toDiv(beginnerArea[i])).style.backgroundColor = 'brown';
+        }
+    }
 }
+
 /*
 TODO
-- Schwierigkeitsgrad in manuell (x Mienen) l
+- Schwierigkeitsgrad in manuell (x Mienen) (?)
 x und automatisch (einfach/mittel/schwer)
 x quadratische anordnung der minen über die weite des minenfelds
 x implementierung des mienen-scharfmachen
 x implementierung indikator (nummer auf den zellen)
 x implementierung des mienen-checks
-- implementierung loss
+x implementierung loss
 x implementierung "aufdecken" benachbarter felder
-- implementierung fieldZero()
-- implementierung win
-- send all fields to reveal after losing
-- show how many mines
+x implementierung fieldZero()
+x implementierung win
+x send all fields to reveal after losing
+x show how many mines
 - show how many mines left (?)
 */
